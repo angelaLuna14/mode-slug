@@ -1,4 +1,3 @@
-
 const string soundx_3 = "misc/tc/x-3.mp3";
 const string soundx_2 = "misc/tc/x-2.mp3";
 const string sound_boos = "misc/tc/boos.mp3";
@@ -11,12 +10,16 @@ const string sound3_1 = "misc/tc/mus/slug21.mp3";
 
 
 
-void PluginInit()
-{
+
+void PluginInit(){
 	g_Module.ScriptInfo.SetAuthor( "Angela Luna" );
 	g_Module.ScriptInfo.SetContactInfo( "https://discord.gg/vZDG886" );
-
+	//ES:
 	//Idea orirginal de Nakano
+	//agreadecimientos a outbeast guia 
+	//EN:
+	//Idea orirginal de Nakano
+	//agreadecimientos a outbeast guia 
 
 	g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @proteccion);
     g_Hooks.RegisterHook(Hooks::Game::MapChange, @ResetOrChangeMap);
@@ -41,7 +44,6 @@ CBaseEntity@ PlayGenericSound(string strSound, Vector vecOrigin)
 
 	return g_EntityFuncs.CreateEntity( "ambient_generic", snd, true );
 }
-
 
 void RealistMode(const CCommand@ pArgs)
 {
@@ -107,14 +109,14 @@ void RealistMode(const CCommand@ pArgs)
 			PlayGenericSound( sound3_1, pCaller.GetOrigin() ).Use( pCaller, pCaller, USE_TOGGLE, 0.0f );
 			realiston();
 			fog();
+			
 		}
 		else
 			g_PlayerFuncs.ClientPrint(pCaller, HUD_PRINTTALK, "Las musicas son de 1 al 8\n");
 
 }
 
-HookReturnCode ent_efects()
-{
+HookReturnCode ent_efects(){
 	for( int i = 0; i < g_Engine.maxEntities; ++i ) {
 		CBaseEntity@ pEntity = g_EntityFuncs.Instance( i );
 		if( pEntity is null ) continue;
@@ -123,11 +125,11 @@ HookReturnCode ent_efects()
 			npcsheal();
 		}
 	}
+
     return HOOK_CONTINUE;
 }
 
-void ent_efect()
-{
+void ent_efect(){
 
 	CBaseEntity@ pEnt = null;
 
@@ -141,8 +143,7 @@ void ent_efect()
 }
 
 
-void realiston()
-{
+void realiston(){
 	
 	CBasePlayer@ pCaller = g_ConCommandSystem.GetCurrentPlayer();
 	CBaseEntity@ info_ent = g_EntityFuncs.Create("ambient_generic", pCaller.GetOrigin() + Vector(0, 60, 0), Vector(0, 0, 0), false);
@@ -169,36 +170,32 @@ void realiston()
 
 void MapInit() {
 
-    g_SoundSystem.PrecacheSound(sound3_1);
-
+	g_SoundSystem.PrecacheSound(sound3_1);
 }
 
 
-void RealistModeoff(const CCommand@ pArgs) 
-{
-	
+void RealistModeoff(const CCommand@ pArgs) {
 	CBasePlayer@ pCaller = g_ConCommandSystem.GetCurrentPlayer();
-	CBaseEntity@ info_ent = g_EntityFuncs.Create("ambient_generic", pCaller.GetOrigin() + Vector(0, 60, 0), Vector(0, 0, 0), false);
+	CBaseEntity@ pSound = PlayGenericSound( sound3_1, pCaller.GetOrigin() );
 	if (g_PlayerFuncs.AdminLevel(pCaller) < ADMIN_YES)
 	   g_PlayerFuncs.ClientPrint(pCaller, HUD_PRINTCONSOLE, "You have no access to this command.\n");
 	else
-        
+		
 	    g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @weapons);	
 		npcshealoff();
 		player_weapon_disable();
+		pSound.Use( pCaller, pCaller, USE_OFF, 0.0f ); // turns off sound
 		
 		g_EngineFuncs.ServerCommand("mp_respawndelay 5 \n");
 		g_EngineFuncs.ServerCommand("weaponmode_shotgun 0 \n"); 
 		g_EngineFuncs.ServerCommand("weaponmode_9mmhandgun 0 \n"); 
 		g_EngineFuncs.ServerCommand("weaponmode_displacer 0 \n"); 
-
 		g_Hooks.RemoveHook( Hooks::Game::EntityCreated, @ent_efects );
 		fogoff();
 
 }
 
-HookReturnCode ResetOrChangeMap()
-{
+HookReturnCode ResetOrChangeMap(){
 	CBasePlayer@ pCaller = g_ConCommandSystem.GetCurrentPlayer();
 	CBaseEntity@ info_ent = g_EntityFuncs.Create("ambient_generic", pCaller.GetOrigin() + Vector(0, 60, 0), Vector(0, 0, 0), false);
 
@@ -220,8 +217,7 @@ HookReturnCode ResetOrChangeMap()
 
 
 
-void CfgServerOn()
-{
+void CfgServerOn(){
 	g_EngineFuncs.ServerCommand("mp_respawndelay 1\n");
 	g_EngineFuncs.ServerCommand("mp_weapon_droprules 0 \n");
 	g_EngineFuncs.ServerCommand("weaponmode_shotgun 1 \n"); 
@@ -231,8 +227,7 @@ void CfgServerOn()
 }
 
 
-void CfgServerOff()
-{
+void CfgServerOff(){
 	g_EngineFuncs.ServerCommand("mp_respawndelay 5 \n");
 	g_EngineFuncs.ServerCommand("weaponmode_shotgun 0 \n"); 
 	g_EngineFuncs.ServerCommand("weaponmode_9mmhandgun 0 \n"); 
@@ -240,8 +235,16 @@ void CfgServerOff()
 }
 
 
-void multiplySpeed(CBaseEntity@ pEntity)
-{
+
+
+
+
+
+
+	
+
+
+void multiplySpeed(CBaseEntity@ pEntity){
 	CustomKeyvalues@ cKeyValues = pEntity.GetCustomKeyvalues();
 	
 	if(!cKeyValues.HasKeyvalue("$f_originalSpeed")){
@@ -255,8 +258,7 @@ void multiplySpeed(CBaseEntity@ pEntity)
 
 }
 
-void multiplyMaxSpeed(CBaseEntity@ pEntity)
-{
+void multiplyMaxSpeed(CBaseEntity@ pEntity){
 	CustomKeyvalues@ cKeyValues = pEntity.GetCustomKeyvalues();
 	
 	if(!cKeyValues.HasKeyvalue("$f_originalMaxSpeed")){
@@ -295,7 +297,6 @@ HookReturnCode weapons(CBasePlayer@ pPlayer)
 {   
 	pPlayer.RemoveAllItems(false);
 	p_weapons( EHandle( pPlayer ), 0 );
-    player_weapon();
 
 	
     return HOOK_CONTINUE;
@@ -320,46 +321,38 @@ void p_weapons(EHandle hPlayer, const int weapon)
 		g_Scheduler.SetTimeout( "p_weapons", 0.8 , hPlayer, 8 );
         
     }
-    if( weapon == 1 )
-	{
+    if( weapon == 1 ){
 		g_EntityFuncs.Create("weapon_9mmhandgun", pPlayer.GetOrigin() + Vector(0, 0, 0), Vector(0, 0, 0),  false).KeyValue("m_flCustomRespawnTime", "-1");
 		
 
     }
-	if( weapon == 2 )
-	{
+	if( weapon == 2 ){
 		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
 		
     }
-	if( weapon == 3 )
-	{
+	if( weapon == 3 ){
 
 		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
 		
     }
-	if( weapon == 4 )
-	{
+	if( weapon == 4 ){
 		pPlayer.GiveNamedItem("item_longjump", 0, 0);
 		
 
     }
-	if( weapon == 5 )
-	{
+	if( weapon == 5 ){
 		
 		pPlayer.GiveNamedItem("weapon_handgrenade", 0, 0);
 
     }
-	if( weapon == 6 )
-	{
+	if( weapon == 6 ){
 		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
 
     }
-	if( weapon == 7 )
-	{
+	if( weapon == 7 ){
 		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
     }
-	if( weapon == 8 )
-	{
+	if( weapon == 8 ){
 		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
 
     }
@@ -370,8 +363,8 @@ void p_weapons(EHandle hPlayer, const int weapon)
 
 
 
-void player_weapon()
-{
+void player_weapon(){
+
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mm_bullet", 100);
 	g_EngineFuncs.CVarSetFloat("sk_plr_357_bullet", 120);
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mmAR_bullet", 150);
@@ -396,8 +389,8 @@ void player_weapon()
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_other", 1000);
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_radius", 800);
 }
-void player_weapon_disable()
-{
+void player_weapon_disable(){
+
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mm_bullet",8 );
 	g_EngineFuncs.CVarSetFloat("sk_plr_357_bullet",40);
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mmAR_bullet", 8);
@@ -424,13 +417,10 @@ void player_weapon_disable()
 }
 
 
-void npcsheal()
-{
-	for( int i = 3; i < g_Engine.maxEntities; ++i ) 
-	{
+void npcsheal(){
+	for( int i = 3; i < g_Engine.maxEntities; ++i ) {
 		CBaseEntity@ ent = g_EntityFuncs.Instance( i );
-		if( ent !is null ) 
-		{
+		if( ent !is null ) {
 			if( ent.pev.health <= 0.0 || ent.pev.health >= 10000.0 || ent.Classify() == CLASS_PLAYER_ALLY ) continue;
             
 			
@@ -624,8 +614,7 @@ void npcsheal()
 void npcshealoff(){
 
 	
-	for( int i = 3; i < g_Engine.maxEntities; ++i ) 
-	{
+	for( int i = 3; i < g_Engine.maxEntities; ++i ) {
 		CBaseEntity@ ent = g_EntityFuncs.Instance( i );
 		if( ent !is null ) {
 			if( ent.pev.health <= 0.0 || ent.pev.health >= 10000.0 || ent.Classify() == CLASS_PLAYER_ALLY ) continue;
@@ -962,3 +951,112 @@ void fogoff()
 		msg.End();
 	}
 }
+
+/*void PluginInit()
+{	
+	g_Module.ScriptInfo.SetAuthor( "Angela Luna" );
+	g_Module.ScriptInfo.SetContactInfo("https://discord.gg/WrZJcRZvEZ");
+	deadnpcs();
+}
+
+const string sprite5 = "sprites/tc/chatreaccion/f.spr";
+
+
+void MapInit()
+{
+	deadnpcs();
+}
+void deadnpcs(){
+	CBaseEntity@ thisMonster = null;
+
+	while((@thisMonster = g_EntityFuncs.FindEntityByClassname(thisMonster, "monster_*")) !is null){
+		if(( thisMonster.pev.deadflag & DEAD_DEAD )!= 0  || (thisMonster.pev.health < -60 ) ){
+			CSprite@ ent_sprite = g_EntityFuncs.CreateSprite( sprite5, thisMonster.pev.origin +  Vector(0, 0, 100), true );
+			ent_sprite.AnimateAndDie(5);
+			
+		
+		}
+	}
+}
+
+void AnimateAndDie(float flFramerate){
+
+
+}
+
+
+
+//Agradecimientos 
+//Mario AR (sprites)
+//KernCore (guia)
+
+const string deadplr = "misc/tc/custom/oof.mp3";
+const string deadplr0 = "misc/tc/custom/au.mp3";
+const string sprite1 = "sprites/tc/dead.spr";
+const string sprite2 = "sprites/tc/afknow.spr";
+const string soundplr = "misc/tc/custom/au.mp3";
+const string deadplr1 = "misc/tc/metes.mp3";
+const string g_MalfunctionSound = 'parallax/message.wav';
+const string sprite3 = "sprites/sandclock.spr";
+array<string> g_stachel;
+array<string> g_stachelActive; 
+array<string> g_RPG;
+array<string> g_RPGActive; 
+CScheduledFunction@ g_pThinkFunc = null;
+const string sound = 'misc/tc/custom/au.mp3';
+const int satchelcount = 0;
+const int RPGcount = 0;
+
+
+
+void PluginInit() {
+  g_Module.ScriptInfo.SetAuthor("Angela Luna");
+  g_Module.ScriptInfo.SetContactInfo(" https://discord.gg/WrZJcRZvEZ");
+
+  //g_Hooks.RegisterHook(Hooks::Weapon::WeaponPrimaryAttack, @stachel);
+  //g_Hooks.RegisterHook(Hooks::Weapon::WeaponPrimaryAttack, @w_rpg);
+	//g_Hooks.RegisterHook( Hooks::Player::PlayerKilled, @PlayerKilled1 );
+	g_Hooks.RegisterHook( Hooks::Player::PlayerKilled, @PlayerKilled );
+
+
+}
+
+
+
+void MapInit() {
+	
+  for( uint i = 0; i < deadsounds.length(); ++i ){
+		g_Game.PrecacheGeneric( "sound/" + deadsounds[i] );
+		g_SoundSystem.PrecacheSound(string(deadsounds[i]));
+  }
+}
+
+
+const array<string> deadsounds = {
+  "misc/tc/metes.mp3",
+  "misc/tc/au.mp3",
+  "misc/tc/oof.mp3",
+  "misc/tc/a.mp3"
+};
+
+
+
+
+
+
+
+
+HookReturnCode PlayerKilled( CBasePlayer@ pPlayer, CBaseEntity@, int iGib){
+
+	if (!((pPlayer.pev.health < -360000 && iGib != GIB_NEVER) || iGib == GIB_ALWAYS)) {
+	  pPlayer.pev.deadflag = DEAD_DEAD;
+      pPlayer.pev.deadflag = DEAD_DYING;
+      
+        g_SoundSystem.PlaySound(pPlayer.edict(), CHAN_AUTO, string(deadsounds[i]) ,  0.55f, 0.65f, 0, 100, 0, true, pPlayer.pev.origin);
+        pPlayer.ShowOverheadSprite(sprite3, 51.0f, 6.0f);
+	}
+
+	return HOOK_CONTINUE;
+}
+
+
