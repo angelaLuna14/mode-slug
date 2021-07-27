@@ -967,7 +967,7 @@ void p_weapons(EHandle hPlayer, const int weapon)
 	if( weapon == 8 )
 	{
 
-		pPlayer.GiveNamedItem("weapon_medkit", 1000000, 1000000);
+		pPlayer.GiveNamedItem("weapon_medkit", 0, 0);
 
     }
 	if( weapon == 9 )
