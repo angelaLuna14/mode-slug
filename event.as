@@ -821,6 +821,7 @@ void killdrop(){
 
 
 }
+//esos errores xD
 /*WARNING: Angelscript: CScheduler: could not add function 'entitys', function not found
 WARNING: Angelscript: CScheduler: could not add function 'ent_s', function not found
 WARNING: Angelscript: CScheduler: could not add function 'accion_ents', function not found
@@ -935,12 +936,12 @@ void p_weapons(EHandle hPlayer, const int weapon)
     }
 	if( weapon == 2 )
 	{
-		pPlayer.GiveNamedItem("weapon_9mmhandgun", 1000000);
+		pPlayer.GiveNamedItem("weapon_9mmhandgun", 0, 0);
 		
     }
 	if( weapon == 3 ){
 
-		pPlayer.GiveNamedItem("ammo_9mmAR", 1000000);
+		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
 		
     }
 	if( weapon == 4 )
