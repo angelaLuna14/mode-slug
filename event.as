@@ -1,7 +1,3 @@
-
-
-
-//g_EntityFuncs.KillTarget
 void PluginInit(){
 	g_Module.ScriptInfo.SetAuthor( "Angela Luna" );
 	g_Module.ScriptInfo.SetContactInfo( "https://discord.gg/vZDG886" );
@@ -39,8 +35,29 @@ CBaseEntity@ PlayGenericSound(string strSound, Vector vecOrigin)
 	return g_EntityFuncs.CreateEntity( "ambient_generic", snd, true );
 }
 
+const string soundx_3 = "misc/tc/x-3.mp3";
+const string soundx_2 = "misc/tc/x-2.mp3";
+const string sound_boos = "misc/tc/boos.mp3";
+const string sound3_5 = "misc/tc/3-5.mp3";
+const string sound3_4 = "misc/tc/3-4.mp3";
+const string sound3_3 = "misc/tc/3-3.mp3";
+const string sound3_2 = "misc/tc/3-2.mp3";
+const string sound3_1a = "misc/tc/3-1.mp3";
+const string sound3_1 = "misc/tc/mus/slug21.mp3";
+const string m_s = "misc/tc/mus/mision1.mp3";
+
+
 const array<string> random_mode = 
 {
+	"misc/tc/3-1.mp3",
+	"misc/tc/3-2.mp3",
+	"misc/tc/3-3.mp3",
+	"misc/tc/3-4.mp3",
+	"misc/tc/3-5.mp3",
+	"misc/tc/x-2.mp3",
+	"misc/tc/x-3.mp3",
+	"misc/tc/boos.mp3",
+	"misc/tc/boos-teme.mp3",
 	"misc/tc/mus/slug21.mp3"
 };
 
@@ -71,9 +88,10 @@ const array<string> g_RemoveEnts = {'func_healthcharger', 'func_recharge', 'item
 
 const array<string> deadnpcs = 
 {
-  "misc/tc/npcsdead/dead1.mp3",
-  "misc/tc/npcsdead/dead2.mp3",
-  "misc/tc/npcsdead/dead3.mp3"
+  "misc/tc/npcsdead/dead4.mp3",
+  "misc/tc/npcsdead/dead5.mp3",
+  "misc/tc/npcsdead/dead6.mp3",
+  "misc/tc/npcsdead/dead7.mp3"
 
 };
 
@@ -91,19 +109,7 @@ const string sprite5 = "sprites/tc/chatreaccion/f.spr";
 
 const array<string> P_ENTITIES = {FL_MONSTER};
 
-const string soundx_3 = "misc/tc/x-3.mp3";
-const string soundx_2 = "misc/tc/x-2.mp3";
-const string sound_boos = "misc/tc/boos.mp3";
-const string sound3_5 = "misc/tc/3-5.mp3";
-const string sound3_4 = "misc/tc/3-4.mp3";
-const string sound3_3 = "misc/tc/3-3.mp3";
-const string sound3_2 = "misc/tc/3-2.mp3";
-const string sound3_1a = "misc/tc/3-1.mp3";
-const string sound3_1 = "misc/tc/mus/realist21.mp3";
-const string m_s = "misc/tc/mus/mision1.mp3";
-const string dead_s1 = "misc/tc/mus/dead.mp3";
-const string dead_s2 = "misc/tc/mus/dead.mp3";
-const string dead_s3 = "misc/tc/mus/dead.mp3";
+
 
 array<int> Jumpedcound(33);
 array<bool> DoJump(33);
@@ -113,7 +119,7 @@ CCVar@ cvar_MjJump;
 CCVar@ cvar_AdminOnly;
 CCVar@ cvar_MJOnly;
 
-CScheduledFunction@ ent_s = null;
+CScheduledFunction@ d_i_a = null;
 CScheduledFunction@ refresh_s = null;
 
 
@@ -121,7 +127,10 @@ CScheduledFunction@ refresh_s = null;
 void playmodes(const CCommand@ pArgs){
 	CBasePlayer@ pCaller = g_ConCommandSystem.GetCurrentPlayer();
 	const string mode = pArgs.ArgC() >= 1 ?  pArgs.Arg( 1 )  : "";
-	const string toggled = pArgs.ArgC() >= 3 ?  pArgs.Arg( 2 )  : "";
+	const uint toggled = pArgs.ArgC() >= 2 ?  atoi(pArgs.Arg( 2 ))  : 0;
+	int i = Math.RandomLong(0,random_mode.length()-1);
+	const string r_mode = pArgs.ArgC() >= 3 ?  pArgs.Arg( 2 )  : "";
+
 
 	if (g_PlayerFuncs.AdminLevel(pCaller) < ADMIN_YES){
 	   g_PlayerFuncs.ClientPrint(pCaller, HUD_PRINTCONSOLE, "You have no access to this command.\n");
@@ -157,10 +166,26 @@ void playmodes(const CCommand@ pArgs){
 		}
 		else if( mode == "realist")
 		{
-			int i = Math.RandomLong(0,random_mode.length()-1);
+			if(r_mode == 1){
+				realiston();
+			}
 
-			PlayGenericSound( string(random_mode[i]), pCaller.GetOrigin() ).Use( pCaller, pCaller, USE_TOGGLE, 0.0f );
-			realiston();
+			else if (r_mode == 0){
+
+				mode_rushoff();
+				RealistModeoff();
+				random_weaponsoff();
+				g_PlayerFuncs.ClientPrint(pCaller, HUD_PRINTTALK, "Se han cancelado todos los modos \n");
+			}
+
+			else{
+
+				
+				PlayGenericSound( string(random_mode[i]), pCaller.GetOrigin() ).Use( pCaller, pCaller, USE_TOGGLE, 0.0f );
+				realiston();
+			}
+
+
 
 		}
 
@@ -168,8 +193,8 @@ void playmodes(const CCommand@ pArgs){
 		{
 			random_weapons();
 			
-			for (uint i = 0; i < r_Weapon.length(); i++) {
-				string checkName = r_Weapon[i];
+			for (uint a = 0; a < r_Weapon.length(); i++) {
+				string checkName = r_Weapon[a];
 				if (checkName == "weapon_shotgun"){
 					
 				}
@@ -254,7 +279,7 @@ void g_mode(){
 	for( int iPlayer = 1; iPlayer <= g_Engine.maxClients; ++iPlayer )
 	{
 		@pPlayer = g_PlayerFuncs.FindPlayerByIndex( iPlayer );
-		if( pPlayer is null || !pPlayer.IsConnected() )
+		if( pPlayer is null )
 			continue;
 
 		if(pPlayer.IsAlive())
@@ -267,6 +292,18 @@ void g_mode(){
 	
 
 }
+
+
+HookReturnCode PlayerTakeDamage(DamageInfo@ pDamageInfo)
+{
+    if( pDamageInfo is null || pDamageInfo.pVictim is null || pDamageInfo.pAttacker is null || pDamageInfo.pInflictor is null )
+        return HOOK_CONTINUE;
+
+    if( pDamageInfo.pAttacker.IsPlayer() || pDamageInfo.pInflictor.IsPlayer() ) 
+        pDamageInfo.flDamage = 0.0f;
+    return HOOK_CONTINUE;
+}
+
 
 void mode_rushoff(){
 	CBasePlayer@ pCaller = g_ConCommandSystem.GetCurrentPlayer();
@@ -408,7 +445,7 @@ void internal_anti_bhop(){
 	@g_psv_gravity = g_EngineFuncs.CVarGetPointer( "sv_gravity" );
 	
 	//Check for velocity every 0.1 seconds.
-	g_Scheduler.SetInterval( "ClampVelocities", 0.05 );
+	@d_i_a = g_Scheduler.SetInterval( "ClampVelocities", 0.05 );
 	
 	g_PlayerData.resize( g_Engine.maxClients );
 	
@@ -427,6 +464,11 @@ void internal_anti_bhop(){
 		PlayerData data( pPlayer );
 		@g_PlayerData[ pPlayer.entindex() - 1 ] = @data;
 	}
+}
+
+void disamble_internal_anti_bhop(){
+
+
 }
 
 void MapInit()
@@ -637,21 +679,8 @@ HookReturnCode PlPutinServer( CBasePlayer@ pPlayer )
 
 
 
-
 // effects for entities, this bug
-HookReturnCode ent_efects(CBaseEntity@ pEntity)
-{
 
-
-	while((@pEntity = g_EntityFuncs.FindEntityByClassname(pEntity, "monster_*")) !is null){
-		ent_efect();
-		npcsheal();
-		return HOOK_HANDLED;
-	}
-	
-
-    return HOOK_CONTINUE;
-}
 
 void ent_efect(){
 
@@ -688,9 +717,7 @@ void realiston()
 	g_Hooks.RegisterHook( Hooks::Player::PlayerPostThink, @PlPostThink );
 	g_Hooks.RegisterHook( Hooks::Player::ClientPutInServer, @PlPutinServer );
 	g_Hooks.RegisterHook( Hooks::Player::PlayerSpawn, @PlayerSpawn );
-	@refresh_s = g_Scheduler.SetInterval( "ent_s", 0.0f );
-	@refresh_s = g_Scheduler.SetInterval( "accion_ents", 0.0f );
-	@g_ents = g_Scheduler.SetInterval( "ents", 0.25f );
+
 	player_weapon();
 	ent_efect();
 	CfgServerOn();
@@ -699,7 +726,7 @@ void realiston()
 	monsterList.removeRange(0, monsterList.length());
 	nameList.removeRange(0, nameList.length());
 	posList.removeRange(0, posList.length());
-	@refreshMonster = g_Scheduler.SetInterval("killdrop", 0.3, g_Scheduler.REPEAT_INFINITE_TIMES);
+	@refreshMonster = g_Scheduler.SetInterval("killdrop", 0.0f);
 	pCaller.RemoveAllItems(false);
 	p_weapons( EHandle( pCaller ), 0 );	
 	sounds_m( EHandle( pCaller ), 0 );	
@@ -715,7 +742,9 @@ void realiston()
 	
 	
 	g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @weapons);
-	g_Hooks.RegisterHook( Hooks::Game::EntityCreated, @ent_efects );
+	g_Hooks.RegisterHook( Hooks::Player::PlayerKilled, @PlayerKilled );
+	g_Hooks.RegisterHook(Hooks::Player::PlayerSpawn, @PlayerSpawn2);
+	g_Hooks.RegisterHook( Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage );
 
 
 
@@ -733,8 +762,6 @@ void RealistModeoff()
 	   g_PlayerFuncs.ClientPrint(pCaller, HUD_PRINTCONSOLE, "You have no access to this command.\n");
 	else
 		
-		g_Scheduler.RemoveTimer(ent_s);
-		g_Scheduler.RemoveTimer(refresh_s);
 		for (uint i = 0; i < random_mode.length(); ++i) {
 			for (uint g = 0; g < channels.length(); g++)
 			{
@@ -746,19 +773,22 @@ void RealistModeoff()
 		player_weapon_disable();
 		
 		g_Scheduler.RemoveTimer(refreshMonster);
-		g_Scheduler.RemoveTimer(g_ents );
+		g_Scheduler.RemoveTimer(d_i_a);
+
 		g_EngineFuncs.ServerCommand("mp_respawndelay 5 \n");
 		g_EngineFuncs.ServerCommand("weaponmode_shotgun 0 \n"); 
 		g_EngineFuncs.ServerCommand("weaponmode_9mmhandgun 0 \n"); 
 		g_EngineFuncs.ServerCommand("weaponmode_displacer 0 \n"); 
-		g_Hooks.RemoveHook( Hooks::Game::EntityCreated, @ent_efects );
 		g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @weapons);	
 		g_Hooks.RemoveHook( Hooks::Player::PlayerPreThink, @PlPreThink );
 		g_Hooks.RemoveHook( Hooks::Player::PlayerPostThink, @PlPostThink );
 		g_Hooks.RemoveHook( Hooks::Player::ClientPutInServer, @PlPutinServer );
 		g_Hooks.RemoveHook( Hooks::Player::PlayerSpawn, @PlayerSpawn );
-		
-
+		g_Hooks.RemoveHook( Hooks::Player::PlayerKilled, @PlayerKilled );
+		g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @PlayerSpawn2);
+		g_Hooks.RemoveHook( Hooks::Player::PlayerTakeDamage, @PlayerTakeDamage );
+		g_Hooks.RemoveHook( Hooks::Player::ClientPutInServer, @ClientPutInServer );
+		g_Hooks.RemoveHook( Hooks::Player::ClientDisconnect, @ClientDisconnect );
 		
 
 	// buscar la manera que pare y que se cuente a todos los npcs
@@ -766,18 +796,41 @@ void RealistModeoff()
 }
 
 
-void accion_ents(CBasePlayer@ pPlayer){
 
-	p_weapons( EHandle( pPlayer ), 0 );
-}
+
 
 
 CScheduledFunction@ g_ents = null;
 
+array<Vector> VEC_LAST_POS( g_Engine.maxClients + 1 );
+
+HookReturnCode PlayerKilled(CBasePlayer@ pPlayer, CBaseEntity@ pAttacker, int iGib)
+{
+    if( pPlayer is null )
+        return HOOK_CONTINUE;
+        
+    
+
+    VEC_LAST_POS[pPlayer.entindex()] = pPlayer.GetOrigin();
+    return HOOK_CONTINUE;
+}
+
+
+HookReturnCode PlayerSpawn2(CBasePlayer@ pPlayer)
+{
+    if( pPlayer is null || VEC_LAST_POS[pPlayer.entindex()] == g_vecZero )
+        return HOOK_CONTINUE;
+
+		g_EntityFuncs.SetOrigin( pPlayer, VEC_LAST_POS[pPlayer.entindex()] + Vector( 0, 0, 22 ) );
+	pPlayer.pev.fixangle = FAM_FORCEVIEWANGLES;
+
+    return HOOK_CONTINUE;
+}
+
 
 void killdrop(){
 	
-	for(int i=0; i<int(monsterList.length()); i++){
+	for(int i = 0; i<int(monsterList.length()); i++){
 		CBaseEntity@ thatMonster = monsterList[i];
 		if(thatMonster is null || !thatMonster.IsAlive()){
 			m_position(posList[i]);
@@ -818,27 +871,39 @@ void killdrop(){
 		  posList.insertLast(otis.GetOrigin());
 		}
 	}
-
-
-}
-//esos errores xD
-/*WARNING: Angelscript: CScheduler: could not add function 'entitys', function not found
-WARNING: Angelscript: CScheduler: could not add function 'ent_s', function not found
-WARNING: Angelscript: CScheduler: could not add function 'accion_ents', function not found
-WARNING: Angelscript: CScheduler: could not add function 'ents', function not found
-*/
-void m_position( Vector position){
-	CBaseEntity@ npcs = null;
-	while((@npcs = g_EntityFuncs.FindEntityByClassname(npcs, "monster_*")) !is null){
-		CSprite@ ent_sprite = g_EntityFuncs.CreateSprite( sprite5, position +  Vector(0, 0, 100), true );
-		ent_sprite.AnimateAndDie(3);
-		int i = Math.RandomLong(0,deadnpcs.length()-1);
-		g_SoundSystem.PlaySound(npcs.edict(), CHAN_AUTO,string(deadnpcs[i]) ,  1.0f, 0.2f, 0, 100, 0, true, position);
+	while((@otis = g_EntityFuncs.FindEntityByClassname(otis, "monster_male_*")) !is null){
+		int relationship = otis.IRelationshipByClass(CLASS_PLAYER);
+		if(otis.IsAlive() && relationship != R_AL && relationship != R_NO){
+		  EHandle thisMonsterHandle = otis;
+		  monsterList.insertLast(thisMonsterHandle);
+		  nameList.insertLast(otis.GetClassname());
+		  posList.insertLast(otis.GetOrigin());
+		}
 	}
 
 
 }
+/*WARNING: Angelscript: CScheduler: could not add function 'entitys', function not found
+WARNING: Angelscript: CScheduler: could not add function 'd_i_a', function not found
+WARNING: Angelscript: CScheduler: could not add function 'accion_ents', function not found
+WARNING: Angelscript: CScheduler: could not add function 'ents', function not found
+*/
+void m_position( Vector position){
+	
+	int a = Math.RandomLong(0,deadnpcs.length()-1); 
 
+	CBaseEntity@ pEntity = null;
+
+	while((@pEntity = g_EntityFuncs.FindEntityByClassname(pEntity, "monster_*")) !is null){
+		
+		g_SoundSystem.PlaySound(pEntity.edict(), CHAN_AUTO,string(deadnpcs[a]) ,  VOL_NORM, 0, 0, PITCH_NORM, 0, false, g_vecZero );
+	
+	}
+	
+	
+		
+	
+}
 
 
 
@@ -926,64 +991,78 @@ void p_weapons(EHandle hPlayer, const int weapon)
 		g_Scheduler.SetTimeout( "p_weapons", 0.8 , hPlayer, 8 );
 		g_Scheduler.SetTimeout( "p_weapons", 0.9 , hPlayer, 9 );
 		g_Scheduler.SetTimeout( "p_weapons", 1.0 , hPlayer, 10 );
-		g_Scheduler.SetTimeout( "p_weapons", 1.8 , hPlayer, 11 );
+
         
     }
-    if( weapon == 1 )
-	{
-		//g_EntityFuncs.Create("weapon_9mmhandgun", pPlayer.GetOrigin() + Vector(0, 0, 0), Vector(0, 0, 0),  false).KeyValue("m_flCustomRespawnTime", "-1");
-		
+
+	if( weapon == 1 )
+	{			
+
+		pPlayer.SetItemPickupTimes(0);
+
     }
 	if( weapon == 2 )
-	{
-		pPlayer.GiveNamedItem("weapon_9mmhandgun", 0, 0);
+	{			
+
+		giveAmmoCapped(pPlayer, g_PlayerFuncs.GetAmmoIndex("snarks"), "weapon_9mmhandgun", 1);
 		
     }
 	if( weapon == 3 ){
-
-		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
+		
+		g_EntityFuncs.Create("ammo_9mmAR", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
 		
     }
 	if( weapon == 4 )
 	{
-		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
+		
+		g_EntityFuncs.Create("ammo_9mmAR", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
 		
 
     }
 	if( weapon == 5 )
 	{
+		g_EntityFuncs.Create("weapon_handgrenade", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
 		
-		pPlayer.GiveNamedItem("weapon_handgrenade", 0, 0);
-
     }
 	if( weapon == 6 )
 	{
-		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
+		g_EntityFuncs.Create("ammo_9mmAR", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
 
     }
 	if( weapon == 7 )
 	{
-		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
+		g_EntityFuncs.Create("ammo_9mmAR", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
     }
 	if( weapon == 8 )
 	{
-
-		pPlayer.GiveNamedItem("weapon_medkit", 0, 0);
-
+		g_EntityFuncs.Create("weapon_medkit", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
+		
     }
 	if( weapon == 9 )
 	{
-		pPlayer.GiveNamedItem("ammo_9mmAR", 0, 0);
+		g_EntityFuncs.Create("weapon_9mmhandgun", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
 
     }
 	if( weapon == 10 )
 	{
-
-		pPlayer.GiveNamedItem("weapon_crowbar", 0 , 0);
-
+		
+		g_EntityFuncs.Create("weapon_crowbar", pPlayer.GetOrigin()+ Vector(0, 0, 0), Vector(0, 0, 0), false).KeyValue("m_flCustomRespawnTime", "-1");
+		
     }
-        
+
 }
+
+void giveAmmoCapped(CBasePlayer@ pPlayer, int ammoIdx, string item, int count)
+{
+	for (int i = 0; i < count; i++) {
+		if (pPlayer.m_rgAmmo(ammoIdx) < pPlayer.GetMaxAmmo(ammoIdx)) {
+			array<string> args = {item};
+			
+		}
+	}
+}
+
+
 
 void sounds_m(EHandle hPlayer, const int soundM)
 {
@@ -1014,16 +1093,15 @@ void sounds_m(EHandle hPlayer, const int soundM)
 void player_weapon(){
 
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mm_bullet", 100);
-	g_EngineFuncs.CVarSetFloat("sk_plr_9mm_bullet", 100);
-	g_EngineFuncs.CVarSetFloat("sk_plr_357_bullet", 120);
+	g_EngineFuncs.CVarSetFloat("sk_plr_357_bullet", 200);
 	g_EngineFuncs.CVarSetFloat("sk_plr_9mmAR_bullet", 150);
-	g_EngineFuncs.CVarSetFloat("sk_plr_9mmAR_grenade", 150);
+	g_EngineFuncs.CVarSetFloat("sk_plr_9mmAR_grenade", 250);
 	g_EngineFuncs.CVarSetFloat("sk_plr_buckshot", 225);
 	g_EngineFuncs.CVarSetFloat("sk_plr_xbow_bolt_monster", 100);
 	g_EngineFuncs.CVarSetFloat("sk_plr_rpg", 500);
-	g_EngineFuncs.CVarSetFloat("sk_plr_gauss", 100);
-	g_EngineFuncs.CVarSetFloat("sk_plr_egon_narrow", 25);
-	g_EngineFuncs.CVarSetFloat("sk_plr_egon_wide", 25);
+	g_EngineFuncs.CVarSetFloat("sk_plr_gauss", 150);
+	g_EngineFuncs.CVarSetFloat("sk_plr_egon_narrow", 50);
+	g_EngineFuncs.CVarSetFloat("sk_plr_egon_wide", 100);
 	g_EngineFuncs.CVarSetFloat("sk_plr_hand_grenade", 250);
 	g_EngineFuncs.CVarSetFloat("sk_plr_satchel", 350);
 	g_EngineFuncs.CVarSetFloat("sk_plr_tripmine", 250);
@@ -1031,13 +1109,17 @@ void player_weapon(){
 	g_EngineFuncs.CVarSetFloat("sk_plr_grapple", 150);
 	g_EngineFuncs.CVarSetFloat("sk_plr_uzi", 50);
 	g_EngineFuncs.CVarSetFloat("sk_plr_secondarygauss", 500);
-	g_EngineFuncs.CVarSetFloat("sk_plr_762_bullet", 150);
+	g_EngineFuncs.CVarSetFloat("sk_plr_762_bullet", 250);
 	g_EngineFuncs.CVarSetFloat("sk_plr_spore",250);
 	g_EngineFuncs.CVarSetFloat("sk_plr_shockrifle", 50);
 	g_EngineFuncs.CVarSetFloat("sk_plr_shockrifle_beam", 50);
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_other", 1000);
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_radius", 800);
 	g_EngineFuncs.CVarSetFloat("sk_plr_crowbar", 150);
+	g_EngineFuncs.CVarSetFloat("sk_556_bullet", 150);
+	g_EngineFuncs.CVarSetFloat("sk_plr_xbow_bolt_monster", 250);
+	  
+	
 
 	
 }
@@ -1067,6 +1149,7 @@ void player_weapon_disable(){
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_other", 250);
 	g_EngineFuncs.CVarSetFloat("sk_plr_displacer_radius", 300);
 	g_EngineFuncs.CVarSetFloat("sk_plr_crowbar", 15);
+	g_EngineFuncs.CVarSetFloat("sk_556_bullet", 10);
 }
 
 
@@ -1088,7 +1171,7 @@ void npcsheal(){
 			}else if ( ent.pev.classname == "monster_alien_voltigore" ){
 				
 				
-				ent.pev.health = 15000;
+				ent.pev.health = 5000;
 			}else if ( ent.pev.classname == "monster_apache" ){
 				
 				
@@ -1113,7 +1196,7 @@ void npcsheal(){
 			}else if ( ent.pev.classname == "monster_blkop_osprey" ){
 				
 				
-				ent.pev.health = 12000;
+				ent.pev.health = 40000;
 			}else if ( ent.pev.classname == "monster_blkop_apache" ){
 				
 				
@@ -1179,7 +1262,7 @@ void npcsheal(){
 			}else if ( ent.pev.classname == "monster_hwgrunt" ){
 				
 				
-				ent.pev.health = 800;
+				ent.pev.health = 400;
 			}else if ( ent.pev.classname == "monster_ichthyosaur" ){
 				
 				
@@ -1188,7 +1271,7 @@ void npcsheal(){
 			}else if ( ent.pev.classname == "monster_kingpin" ){
 				
 				
-				ent.pev.health = 3200;
+				ent.pev.health = 6800;
 			}else if ( ent.pev.classname == "monster_leech" ){
 				
 				
@@ -1208,7 +1291,7 @@ void npcsheal(){
 			}else if ( ent.pev.classname == "monster_osprey" ){
 				
 				
-				ent.pev.health = 12000;
+				ent.pev.health = 40000;
 			}else if ( ent.pev.classname == "monster_otis" ){
 				
 				
@@ -1548,7 +1631,7 @@ void random_weapons(){
 	for( int iPlayer = 1; iPlayer <= g_Engine.maxClients; ++iPlayer ){
 		@pPlayer = g_PlayerFuncs.FindPlayerByIndex( iPlayer );
 	
-		if( pPlayer is null || !pPlayer.IsConnected() )
+		if( pPlayer is null  )
 		  continue;
 		  
 		  core_r_W( EHandle( pPlayer ), 0 );
@@ -1584,5 +1667,6 @@ void random_weaponsoff(){
 	
 	g_Hooks.RemoveHook(Hooks::Player::PlayerSpawn, @disarm_r_w);
 }
+
 
 
